@@ -23,9 +23,10 @@ export default function Home() {
     } catch (error) {}
   };
   useEffect(() => {
-    if (!bundlerInstance) {
-      initialiseBundlr();
-    }
+    connectWallet();
+    // if (!bundlerInstance) {
+    //   initialiseBundlr();
+    // }
     if (bundlerInstance) {
       fetchBalance();
     }
@@ -50,9 +51,9 @@ export default function Home() {
         if (!fundAmmount) return;
         const amountParsed = parseInput(fundAmmount);
         if (amountParsed) {
-          let response = await bundlerInstance.fund(amountParsed);
-          console.log("Wallet funded: ", response);
-          alert(response)
+          let response = await bundlerInstance.fund(parseInt(amountParsed));
+          setFundAmmount(0);
+
         }
         fetchBalance();
       }
@@ -67,15 +68,9 @@ export default function Home() {
     }
   }
   function parseInput(input) {
-    const conversion = new BigNumber(input).multipliedBy(
-      bundlerInstance.currencyConfig.base[1]
-    );
-    if (conversion.isLessThan(1)) {
-      console.log("error: value too small");
-      return;
-    } else {
-      return conversion;
-    }
+    const value = ethers.utils.parseEther(input);
+    console.log(value);
+    return value;
   }
   return (
     <div className={styles.container}>
@@ -89,7 +84,10 @@ export default function Home() {
           Connect Wallet
         </button>
       )}
-      {address.length > 0 && <p>Connected to address: {address}</p>}
+      {address.length > 0 && <h3>Connected to address: {address}</h3>}
+      {
+        !bundlerInstance && <button className={styles.button} onClick={initialiseBundlr}>Connect to Bundler</button>
+      }
       <div>
         <h3>Bundler balance : {balance} Matic</h3>
         <div>
