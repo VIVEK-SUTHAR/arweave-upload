@@ -107,7 +107,19 @@
   height: 1em;
   margin-left: 0.5rem;
 }
-
+.button{
+  background-color:#0070f3;
+  padding-inline: 8px;
+  padding-block: 12px;
+  font-size: large;
+  border: 0 ;
+  border-radius: 5px;
+}
+.input{
+ padding-inline: 8px;
+  padding-block: 12px;
+  margin-inline: 15px; 
+}
 @media (max-width: 600px) {
   .grid {
     width: 100%;
