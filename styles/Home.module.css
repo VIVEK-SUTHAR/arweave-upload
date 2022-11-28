@@ -107,18 +107,35 @@
   height: 1em;
   margin-left: 0.5rem;
 }
-.button{
-  background-color:#0070f3;
+.button {
+  background-color: #0070f3;
   padding-inline: 8px;
   padding-block: 12px;
   font-size: large;
-  border: 0 ;
+  border: 0;
   border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.1s ease;
 }
-.input{
- padding-inline: 8px;
+.button:hover {
+  transform: scale(1.01);
+}
+.input {
+  padding-inline: 8px;
   padding-block: 12px;
-  margin-inline: 15px; 
+  margin-inline: 15px;
+  font-size: 18px;
+  caret-color: #0070f3;
+  /* border: 1px solid red; */
+}
+.input:focus{
+  border: 1px solid #0070f3;
+  outline: 2px solid #0070f3;
+}
+.preview{
+  max-width: 256px;
+  max-height: 256px;
+  object-fit: contain;
 }
 @media (max-width: 600px) {
   .grid {

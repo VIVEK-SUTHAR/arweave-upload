@@ -1,7 +1,8 @@
 import { WebBundlr } from "@bundlr-network/client";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber, ethers, utils } from "ethers";
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import Loader from "../components/Loader";
 import styles from "../styles/Home.module.css";
 
 export default function Home() {
@@ -10,8 +11,15 @@ export default function Home() {
   const [balance, setBalance] = useState(0);
   const [bundlerInstance, setBundlerInstance] = useState(undefined);
   const [fundAmmount, setFundAmmount] = useState(0);
+  const [isloading, setIsloading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
+  const [price, setPrice] = useState("");
+  const inputref = useRef();
+  const [file, setFile] = useState(null);
   const connectWallet = async () => {
     try {
+      setIsloading((prevState) => !prevState);
+      setLoadingMessage("Connecting Wallet");
       const { ethereum } = window;
       if (!ethereum) throw new Error("Install Metamask");
       const provider = new ethers.providers.Web3Provider(ethereum, "any");
@@ -19,52 +27,82 @@ export default function Home() {
       const signer = provider.getSigner();
       const connecetedAddress = await signer.getAddress();
       setAddress(connecetedAddress);
-      setIsConnetced(true);
-    } catch (error) {}
+      setIsConnetced((prevState) => !prevState);
+      setIsloading((prevState) => !prevState);
+      await initialiseBundlr();
+      fetchBalance();
+    } catch (error) {
+    } finally {
+      setIsloading(false);
+    }
   };
   useEffect(() => {
-    connectWallet();
-    // if (!bundlerInstance) {
-    //   initialiseBundlr();
-    // }
     if (bundlerInstance) {
       fetchBalance();
     }
-  });
+  }, [bundlerInstance]);
   const initialiseBundlr = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider._ready();
-    const bundlr = new WebBundlr(
-      "https://devnet.bundlr.network",
-      "matic",
-      provider,
-      {
-        providerUrl: "https://rpc.ankr.com/polygon_mumbai",
-      }
-    );
-    await bundlr.ready();
-    setBundlerInstance(bundlr);
+    try {
+      setIsloading((prevState) => !prevState);
+      setLoadingMessage("Connecting to Network...");
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider._ready();
+      const bundlr = new WebBundlr(
+        "https://devnet.bundlr.network",
+        "matic",
+        provider,
+        {
+          providerUrl: "https://rpc.ankr.com/polygon_mumbai",
+        }
+      );
+      await bundlr.ready();
+      setBundlerInstance(bundlr);
+      setIsloading((prevState) => !prevState);
+    } catch (error) {
+      setIsloading(false);
+    } finally {
+      setIsloading(false);
+    }
   };
   async function fundWallet() {
     try {
-      if (bundlerInstance) {
-        if (!fundAmmount) return;
-        const amountParsed = parseInput(fundAmmount);
-        if (amountParsed) {
-          let response = await bundlerInstance.fund(parseInt(amountParsed));
-          setFundAmmount(0);
-
-        }
-        fetchBalance();
+      if (!bundlerInstance) return;
+      if (!fundAmmount) {
+        showError();
+        return;
       }
+      const amountParsed = parseInput(fundAmmount);
+      if (!amountParsed) return;
+      setIsloading((prev) => !prev);
+      setLoadingMessage("Please Confirm the tranaction in wallet");
+      await bundlerInstance.fund(parseInt(amountParsed));
+      setFundAmmount(0);
+      fetchBalance();
+      setIsloading((prev) => !prev);
     } catch (error) {
-      console.log("error", error);
+      setIsloading(false);
+    } finally {
+      setIsloading(false);
     }
   }
+  function showError() {
+    inputref.current.style.border = "1px solid red";
+    inputref.current.style.borderRadius = "1px";
+    inputref.current.placeholder = "Please enter ammount > 0";
+    setTimeout(() => {
+      inputref.current.style.border = "none";
+      inputref.current.style.borderRadius = "1px";
+      inputref.current.placeholder = "";
+    }, 2000);
+  }
+
   async function fetchBalance() {
-    if (bundlerInstance) {
+    try {
+      if (!bundlerInstance) return;
       const balance = await bundlerInstance.getLoadedBalance();
       setBalance(ethers.utils.formatEther(balance.toString()));
+    } catch (error) {
+      throw new Error("Something went wrong");
     }
   }
   function parseInput(input) {
@@ -72,37 +110,92 @@ export default function Home() {
     console.log(value);
     return value;
   }
+
+  async function uploadFile() {
+    try {
+      setIsloading((prevState) => !prevState);
+      setLoadingMessage("Uploading File to PermaWeb...");
+      const uploader = bundlerInstance?.uploader.chunkedUploader;
+      console.log(uploader);
+      // uploader
+      //   ?.uploadData(imgStream, {
+      //     tags: [{ name: "Content-Type", value: file.type }],
+      //   })
+      //   .then((res) => {
+      //     // setLastUploadId(res.data.id);
+      //     console.log(res.data.id);
+      //   });
+        setIsloading(false);
+    } catch (error) {}
+  }
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Arweave Upload</title>
-        <meta name="description" content="Generated by create next app" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      {!isConnetced && (
-        <button onClick={connectWallet} className={styles.button}>
-          Connect Wallet
-        </button>
-      )}
-      {address.length > 0 && <h3>Connected to address: {address}</h3>}
-      {
-        !bundlerInstance && <button className={styles.button} onClick={initialiseBundlr}>Connect to Bundler</button>
-      }
-      <div>
-        <h3>Bundler balance : {balance} Matic</h3>
-        <div>
-          <button className={styles.button} onClick={fundWallet}>Fund Bundler</button>
-          <input
-            type={"number"}
-            value={fundAmmount}
-            className={styles.input}
-            onChange={(e) => {
-              e.preventDefault();
-              setFundAmmount(e.target.value);
-            }}
+    <>
+      {isloading && <Loader message={loadingMessage} />}
+      <div className={styles.container}>
+        <Head>
+          <title>Arweave Upload</title>
+          <meta
+            name="description"
+            content="Place to upload your content on permaweb and get links"
           />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <div>
+          {!isConnetced ? (
+            <button onClick={connectWallet} className={styles.button}>
+              Connect Wallets
+            </button>
+          ) : null}
+
+          {isConnetced ? (
+            <>
+              <h3>Connected to Address: {address}</h3>
+              {bundlerInstance ? (
+                <h3>Bundler balance : {balance} Matic</h3>
+              ) : null}
+              <div>
+                <button className={styles.button} onClick={fundWallet}>
+                  Fund Bundler
+                </button>
+                <input
+                  type={"number"}
+                  value={fundAmmount}
+                  className={styles.input}
+                  ref={inputref}
+                  id="fundvalue"
+                  onChange={(e) => {
+                    e.preventDefault();
+                    setFundAmmount(e.target.value);
+                  }}
+                />
+              </div>
+              <div>
+                <input
+                  type={"file"}
+                  className={styles.input}
+                  onChange={(e) => {
+                    e.preventDefault();
+                    setFile(e.target.files[0]);
+                  }}
+                />
+              </div>
+              <div>
+                {file?.type?.includes("image") ? (
+                  <img
+                    src={URL.createObjectURL(file)}
+                    className={styles.preview}
+                  />
+                ) : null}
+              </div>
+              {file ? (
+                <button className={styles.button} onClick={uploadFile}>
+                  Upload File
+                </button>
+              ) : null}
+            </>
+          ) : null}
         </div>
       </div>
-    </div>
+    </>
   );
 }
