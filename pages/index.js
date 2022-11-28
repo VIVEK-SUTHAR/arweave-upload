@@ -4,6 +4,7 @@ import Head from "next/head";
 import React, { useEffect, useRef, useState } from "react";
 import Loader from "../components/Loader";
 import styles from "../styles/Home.module.css";
+import fileReaderStream from "filereader-stream"
 
 export default function Home() {
   const [isConnetced, setIsConnetced] = useState(false);
@@ -113,19 +114,31 @@ export default function Home() {
 
   async function uploadFile() {
     try {
-      setIsloading((prevState) => !prevState);
-      setLoadingMessage("Uploading File to PermaWeb...");
+      // setIsloading((prevState) => !prevState);
+      // setLoadingMessage("Uploading File to PermaWeb...");
       const uploader = bundlerInstance?.uploader.chunkedUploader;
-      console.log(uploader);
-      // uploader
-      //   ?.uploadData(imgStream, {
-      //     tags: [{ name: "Content-Type", value: file.type }],
-      //   })
-      //   .then((res) => {
-      //     // setLastUploadId(res.data.id);
-      //     console.log(res.data.id);
-      //   });
-        setIsloading(false);
+      uploader?.setBatchSize(2);
+      uploader?.setChunkSize(2_000_000);
+      console.log(uploader.uploadData);
+      uploader?.on("chunkUpload", (e) => {
+        // toast({
+        //   status: "info",
+        //   title: "Upload progress",
+        //   description: `${((e.totalUploaded / ((size ?? 0))) * 100).toFixed()}%`
+        // });
+        console.log(e.totalUploaded);
+      });
+      let tx = await uploader.uploadData(fileReaderStream(file), {
+        tags: [
+          {
+            name: "Content-Type",
+            value: file.type,
+          },
+        ],
+      });
+      console.log(tx);
+      console.log(tx?.data.id);
+      // setIsloading(false);
     } catch (error) {}
   }
   return (
