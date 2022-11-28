@@ -4,7 +4,7 @@ import Head from "next/head";
 import React, { useEffect, useRef, useState } from "react";
 import Loader from "../components/Loader";
 import styles from "../styles/Home.module.css";
-import fileReaderStream from "filereader-stream"
+import fileReaderStream from "filereader-stream";
 
 export default function Home() {
   const [isConnetced, setIsConnetced] = useState(false);
@@ -14,7 +14,7 @@ export default function Home() {
   const [fundAmmount, setFundAmmount] = useState(0);
   const [isloading, setIsloading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
-  const [price, setPrice] = useState("");
+  const [arweaveURL, setArweaveURL] = useState("");
   const inputref = useRef();
   const [file, setFile] = useState(null);
   const connectWallet = async () => {
@@ -114,8 +114,8 @@ export default function Home() {
 
   async function uploadFile() {
     try {
-      // setIsloading((prevState) => !prevState);
-      // setLoadingMessage("Uploading File to PermaWeb...");
+      setIsloading((prevState) => !prevState);
+      setLoadingMessage("Uploading File to PermaWeb...");
       const uploader = bundlerInstance?.uploader.chunkedUploader;
       uploader?.setBatchSize(2);
       uploader?.setChunkSize(2_000_000);
@@ -136,10 +136,14 @@ export default function Home() {
           },
         ],
       });
-      console.log(tx);
-      console.log(tx?.data.id);
-      // setIsloading(false);
-    } catch (error) {}
+      await fetchBalance();
+      setArweaveURL(`https://arweave.net/${tx?.data.id}`);
+      setIsloading(false);
+    } catch (error) {
+      setIsloading(false);
+    } finally {
+      setIsloading(false);
+    }
   }
   return (
     <>
@@ -164,11 +168,11 @@ export default function Home() {
             <>
               <h3>Connected to Address: {address}</h3>
               {bundlerInstance ? (
-                <h3>Bundler balance : {balance} Matic</h3>
+                <h3>Bundlr balance : {balance} Matic</h3>
               ) : null}
               <div>
                 <button className={styles.button} onClick={fundWallet}>
-                  Fund Bundler
+                  Fund Bundlr
                 </button>
                 <input
                   type={"number"}
@@ -200,9 +204,20 @@ export default function Home() {
                   />
                 ) : null}
               </div>
+              <div></div>
               {file ? (
                 <button className={styles.button} onClick={uploadFile}>
                   Upload File
+                </button>
+              ) : null}
+              {arweaveURL.length > 0 ? (
+                <button
+                  onClick={() => {
+                    window.open(arweaveURL).focus();
+                  }}
+                  className={styles.button}
+                >
+                  Go to your file
                 </button>
               ) : null}
             </>

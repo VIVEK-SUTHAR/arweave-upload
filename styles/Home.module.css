@@ -115,6 +115,7 @@
   border: 0;
   border-radius: 5px;
   cursor: pointer;
+  margin-inline: 5px;
   transition: all 0.1s ease;
 }
 .button:hover {
