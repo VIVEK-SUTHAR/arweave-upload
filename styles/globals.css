@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 html,
 body {
   padding: 0;
@@ -16,12 +20,8 @@ a {
   box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-  body {
-    color: white;
-    background: black;
-  }
+.img{
+  background-image: url("https://products.ls.graphics/mesh-gradients/images/31.-Portage.jpg");
+  background-position: center;
+  background-size: cover;
 }

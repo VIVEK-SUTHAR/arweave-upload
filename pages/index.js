@@ -159,67 +159,101 @@ export default function Home() {
         </Head>
         <div>
           {!isConnetced ? (
-            <button onClick={connectWallet} className={styles.button}>
-              Connect Wallets
-            </button>
+            <section class="text-gray-600 body-font min-h-screen img">
+              <div class="container mx-auto flex px-5 py-24 items-center justify-center flex-col">
+                <div class="text-center lg:w-2/3 w-full">
+                  <h1 class="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">
+                    PermaStore
+                  </h1>
+                  <p class="mb-8 leading-relaxed">
+                    Upload your file sto arweave for forever for paying the
+                    upfront fees for the only one time
+                  </p>
+                  <div class="flex justify-center">
+                    <button
+                      onClick={connectWallet}
+                      class="inline-flex text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg"
+                    >
+                      Connect Wallet{" "}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
           ) : null}
 
           {isConnetced ? (
             <>
-              <h3>Connected to Address: {address}</h3>
-              {bundlerInstance ? (
-                <h3>Bundlr balance : {balance} Matic</h3>
-              ) : null}
-              <div>
-                <button className={styles.button} onClick={fundWallet}>
-                  Fund Bundlr
-                </button>
-                <input
-                  type={"number"}
-                  value={fundAmmount}
-                  className={styles.input}
-                  ref={inputref}
-                  id="fundvalue"
-                  onChange={(e) => {
-                    e.preventDefault();
-                    setFundAmmount(e.target.value);
-                  }}
-                />
-              </div>
-              <div>
-                <input
-                  type={"file"}
-                  className={styles.input}
-                  onChange={(e) => {
-                    e.preventDefault();
-                    setFile(e.target.files[0]);
-                  }}
-                />
-              </div>
-              <div>
-                {file?.type?.includes("image") ? (
-                  <img
-                    src={URL.createObjectURL(file)}
-                    className={styles.preview}
-                  />
+              <div className="min-h-screen img flex flex-col items-center justify-center">
+                <h3 className="text-base lg:text-2xl  my-3 text-center">
+                  Connected to Address: {address}
+                </h3>
+                {bundlerInstance ? (
+                  <h3 className="text-base lg:text-2xl  my-3">
+                    Bundlr balance : {balance} Matic
+                  </h3>
                 ) : null}
+                <div className="mb-3 pt-0 flex flex-col lg:flex-row gap-5">
+                  <input
+                    type={"number"}
+                    value={fundAmmount}
+                    ref={inputref}
+                    id="fundvalue"
+                    onChange={(e) => {
+                      e.preventDefault();
+                      setFundAmmount(e.target.value);
+                    }}
+                    placeholder="Enter ammount"
+                    className="px-2 py-4 placeholder-slate-300 text-slate-600 relative bg-white rounded text-sm border-0 shadow outline-none focus:outline-none focus:ring w-full"
+                  />
+                  <button
+                    className="min-w-min bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-2 border border-blue-500 hover:border-transparent rounded"
+                    onClick={fundWallet}
+                  >
+                    Fund Bundlr
+                  </button>
+                </div>
+                <div className="mb-3 pt-0 flex flex-col lg:flex-row gap-5">
+                  <input
+                    type={"file"}
+                    className={styles.input}
+                    onChange={(e) => {
+                      e.preventDefault();
+                      setFile(e.target.files[0]);
+                    }}
+                  />
+                </div>
+                <div>
+                  {file?.type?.includes("image") ? (
+                    <img
+                      src={URL.createObjectURL(file)}
+                      className={"w-56 h-56 object-contain rounded-md"}
+                    />
+                  ) : null}
+                </div>
+                <div className="pt-0 flex flex-col gap-2">
+                  {file ? (
+                    <button
+                      className="my-1 px-6 py-4 w-full min-w-min bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white  border border-blue-500 hover:border-transparent rounded"
+                      onClick={uploadFile}
+                    >
+                      Upload File
+                    </button>
+                  ) : null}
+                  {arweaveURL.length > 0 ? (
+                    <button
+                      onClick={() => {
+                        window.open(arweaveURL).focus();
+                      }}
+                      className={
+                        "px-6 py-4 w-full min-w-min bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white  border border-blue-500 hover:border-transparent rounded"
+                      }
+                    >
+                      Go to your file
+                    </button>
+                  ) : null}
+                </div>
               </div>
-              <div></div>
-              {file ? (
-                <button className={styles.button} onClick={uploadFile}>
-                  Upload File
-                </button>
-              ) : null}
-              {arweaveURL.length > 0 ? (
-                <button
-                  onClick={() => {
-                    window.open(arweaveURL).focus();
-                  }}
-                  className={styles.button}
-                >
-                  Go to your file
-                </button>
-              ) : null}
             </>
           ) : null}
         </div>
