@@ -230,6 +230,18 @@ export default function Home() {
                       className={"w-56 h-56 object-contain rounded-md"}
                     />
                   ) : null}
+                  {arweaveURL.length > 0 ? (
+                    <button
+                      onClick={() => {
+                        window.open(arweaveURL).focus();
+                      }}
+                      className={
+                        "px-6 py-2 w-full min-w-min bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white  border border-blue-500 hover:border-transparent rounded"
+                      }
+                    >
+                      Go to your file
+                    </button>
+                  ) : null}
                 </div>
                 <div className="pt-0 flex flex-col gap-2">
                   {file ? (
@@ -238,18 +250,6 @@ export default function Home() {
                       onClick={uploadFile}
                     >
                       Upload File
-                    </button>
-                  ) : null}
-                  {arweaveURL.length > 0 ? (
-                    <button
-                      onClick={() => {
-                        window.open(arweaveURL).focus();
-                      }}
-                      className={
-                        "px-6 py-4 w-full min-w-min bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white  border border-blue-500 hover:border-transparent rounded"
-                      }
-                    >
-                      Go to your file
                     </button>
                   ) : null}
                 </div>
