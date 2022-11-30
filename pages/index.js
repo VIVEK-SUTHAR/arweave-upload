@@ -184,7 +184,7 @@ export default function Home() {
 
           {isConnetced ? (
             <>
-              <div className="min-h-screen img flex flex-col items-center justify-center">
+              <div className="min-h-screen img flex flex-col items-center justify-start lg:justify-center">
                 <h3 className="text-base lg:text-2xl  my-3 text-center">
                   Connected to Address: {address}
                 </h3>
